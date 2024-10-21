@@ -52,7 +52,7 @@ class Sarsa(Agent):
         if np.random.rand() < self.epsilon:
             return np.random.randint(0, 9)  # Explore: Random action
         else:
-            q_values = [self.q_values.get((state, a), 0) for a in range(9)]
+            q_values = [self.q_values.get((*state, a), 0) for a in range(9)]
             max_q = max(q_values)
             best_actions = [i for i, q in enumerate(q_values) if q == max_q]
             return np.random.choice(best_actions)  # Exploit: Best action
