@@ -109,10 +109,12 @@ def make_eps_greedy_policy_distribution(state_action_values: ActionValueDict, ep
 
     def policy(state: State) -> list[float]:
         if epsilon == 1:
-            return [1.0 / n_actions] * n_actions  # Uniform distribution for epsilon = 1
+            # Uniform distribution for epsilon = 1
+            return [1.0 / n_actions] * n_actions  
 
         action_probabilities = np.zeros(n_actions)
-        q_values = [state_action_values.get((state, a), 0) for a in range(n_actions)]
+        # Assuming state is a tuple or list with more than one element
+        q_values = [state_action_values.get((*state, a), 0) for a in range(n_actions)]  # Fix key lookup
         max_q_value = max(q_values)
 
         for a in range(n_actions):
@@ -124,6 +126,7 @@ def make_eps_greedy_policy_distribution(state_action_values: ActionValueDict, ep
         return action_probabilities
 
     return policy
+
 
 
 
