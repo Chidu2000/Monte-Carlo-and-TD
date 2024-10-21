@@ -117,7 +117,7 @@ def train_episode(agent: Agent, env: RaceTrack) -> tuple[list[State], list[Actio
     rewards = []
     actions = []
 
-    state, _ = env.reset()  # Ignore info; unpack the initial state
+    state = env.reset()  # Ignore info; unpack the initial state
     done = False
     truncated = False
     prev_state = state
