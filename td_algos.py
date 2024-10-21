@@ -117,40 +117,51 @@ def train_episode(agent: Agent, env: RaceTrack) -> tuple[list[State], list[Actio
 
     state = env.reset()
     done = False
-    truncated = False  # Track the truncated condition
+    truncated = False  # To handle truncation when time runs out
     prev_state = state
     prev_action = None
     prev_reward = 0
 
     step_count = 0  # Track the number of steps
 
-    while not (done or truncated):  # Stop if either `done` or `truncated` is True
+    while not (done or truncated):  # Stop if either 'done' or 'truncated' is True
         states.append(state)
 
         if prev_action is not None:
-            # If we have a previous action, call the agent's step function
+            # Use agent_step method after the first step
             action = agent.agent_step(prev_state, prev_action, prev_reward, state, done)
         else:
-            action = np.random.randint(0, 9)  # Initial action
+            action = np.random.randint(0, 9)  # Random action initially
         actions.append(action)
 
-        # Take a step in the environment, check both `done` and `truncated`
+        # Perform the action in the environment and get the results
         next_state, reward, done, truncated = env.step(action)
-        
-        # Only append reward if the episode is not done or truncated
-        if not (done or truncated):
-            rewards.append(reward)
+
+        # Handle specific reward conditions
+        if truncated:  # Out of time case
+            reward = -500
+        elif done:
+            if reward == 50:  # Reached the finish line
+                reward = 50
+            elif reward == -1000:  # Touched the gravel
+                reward = -1000
+        else:
+            reward = -1  # Default step reward
+
+        # Append the correct reward
+        rewards.append(reward)
 
         # Update previous state, action, and reward
         prev_state = state
         prev_action = action
         prev_reward = reward
 
-        # Update the current state to the next state
+        # Move to the next state
         state = next_state
-        step_count += 1  # Increment step count
+        step_count += 1
 
     return states, actions, rewards
+
 
 
 
