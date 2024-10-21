@@ -128,12 +128,18 @@ def is_mc_estimate_with_ratios(
         state = tuple(states[t]) if isinstance(states[t], list) else states[t]
         action = actions[t]
 
-        # Ensure action is hashable
-        if not isinstance(action, (int, str, tuple)):
-            action = str(action)
+        # Ensure action is an integer
+        if not isinstance(action, int):
+            raise ValueError("Action must be an integer")
 
-        target_prob = target_policy(state)[action]
-        behavior_prob = behaviour_policy(state)[action]
+        # Ensure state is hashable
+        try:
+            hash(state)
+        except TypeError:
+            raise ValueError("State must be hashable")
+
+        target_prob = target_policy.get(state, {}).get(action, 0)
+        behavior_prob = behaviour_policy.get(state, {}).get(action, 0)
 
         ratio = target_prob / behavior_prob if behavior_prob > 0 else 0
 
