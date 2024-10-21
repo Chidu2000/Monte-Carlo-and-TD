@@ -112,11 +112,12 @@ def is_mc_estimate_with_ratios(
     target_policy: DistributionPolicy,
     behaviour_policy: DistributionPolicy,
     discount: float
-) -> dict[StateAction, list[tuple[float, float]]]:
+) -> dict[tuple[State, Action], list[tuple[float, float]]]:
     state_action_returns_and_ratios = {}
 
     cumulative_returns = []
     G = 0
+    # Calculate cumulative returns
     for t in reversed(range(len(rewards))):
         G = rewards[t] + discount * G
         cumulative_returns.append(G)
@@ -125,27 +126,31 @@ def is_mc_estimate_with_ratios(
     # Calculate importance sampling ratios and estimates
     importance_sampling_ratios = []
     for t in range(len(states)):
-        # Assuming states[t] and actions[t] are immutable or made immutable
-        state = tuple(states[t]) if isinstance(states[t], list) else states[t]
+        state = tuple(states[t]) if isinstance(states[t], list) else states[t]  # Ensure state is a tuple
         action = actions[t]
 
+        # Fetch probabilities from both policies
         target_prob = target_policy(state)[action]
         behavior_prob = behaviour_policy(state)[action]
+
+        # Calculate the importance sampling ratio
         ratio = target_prob / behavior_prob if behavior_prob > 0 else 0
         importance_sampling_ratios.append(ratio)
 
+    # Build the dictionary of state-action pairs and their returns and ratios
     for t in range(len(states)):
-        # Convert state-action pair to immutable type if necessary
         state_action = (tuple(states[t]) if isinstance(states[t], list) else states[t], actions[t])
         
         if state_action not in state_action_returns_and_ratios:
             state_action_returns_and_ratios[state_action] = []
 
+        # Append the cumulative return and importance sampling ratio as a tuple
         state_action_returns_and_ratios[state_action].append(
             (cumulative_returns[t], importance_sampling_ratios[t])
         )
 
     return state_action_returns_and_ratios
+
 
 
 
