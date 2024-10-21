@@ -42,7 +42,7 @@ class Agent():
         raise NotImplementedError
 
 class Sarsa(Agent):
-    def __init__(self, epsilon=0.1, gamma=0.4, alpha=0.01):
+    def __init__(self, epsilon=0.05, gamma=0.99, alpha=0.1):
         self.q_values = {}
         self.gamma = gamma  # Discount factor
         self.alpha = alpha  # Learning rate
@@ -82,7 +82,7 @@ class Sarsa(Agent):
 class QLearningAgent(Agent):
     def __init__(self):
         self.q_values = {}
-        self.gamma = 0.4
+        self.gamma = 0.99
         self.alpha = 0.1
         self.nA = 9
         
