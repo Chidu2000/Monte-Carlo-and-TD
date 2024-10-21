@@ -120,7 +120,6 @@ def is_mc_estimate_with_ratios(
 
     cumulative_returns = []
     G = 0
-    # Calculate cumulative returns (discounted sum of future rewards)
     for t in reversed(range(len(rewards))):
         G = rewards[t] + discount * G
         cumulative_returns.append(G)
@@ -130,8 +129,8 @@ def is_mc_estimate_with_ratios(
         state = tuple(states[t]) if isinstance(states[t], list) else states[t]
         action = action_map[actions[t]]
 
-        target_prob = target_policy.get(state, {}).get(action, 0)
-        behavior_prob = behaviour_policy.get(state, {}).get(action, 0)
+        target_prob = target_policy(state)[action]
+        behavior_prob = behaviour_policy(state)[action]
 
         ratio = target_prob / behavior_prob if behavior_prob > 0 else 0
 
