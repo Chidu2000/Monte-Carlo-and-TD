@@ -122,9 +122,7 @@ def train_episode(agent: Agent, env: RaceTrack) -> tuple[list[State], list[Actio
     truncated = False
     prev_state = state
     prev_action = None
-    prev_reward = 0
-
-    step_count = 0
+    prev_reward = 0.0  # Ensure it's a float
 
     while not (done or truncated):  # Stop if either `done` or `truncated` is True
         states.append(state)
@@ -132,7 +130,7 @@ def train_episode(agent: Agent, env: RaceTrack) -> tuple[list[State], list[Actio
         if prev_action is not None:
             action = agent.agent_step(prev_state, prev_action, prev_reward, state, done)
         else:
-            action = np.random.randint(0, 9)  # Initial action
+            action = np.random.randint(0, 9)  # Initial action, ensure it's a valid action
         actions.append(action)
 
         next_state, reward, done, truncated = env.step(action)
@@ -140,16 +138,16 @@ def train_episode(agent: Agent, env: RaceTrack) -> tuple[list[State], list[Actio
         if truncated:
             reward = np.float64(-500.0)
 
-        rewards.append(reward)
+        rewards.append(float(reward))  # Ensure reward is a float
 
+        # Move to the next state
         prev_state = state
         prev_action = action
         prev_reward = reward
-
         state = next_state
-        step_count += 1  # Increment step count
 
     return states, actions, rewards
+
 
 
 
