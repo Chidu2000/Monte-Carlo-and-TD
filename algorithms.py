@@ -116,6 +116,8 @@ def is_mc_estimate_with_ratios(
 ) -> dict[tuple[tuple | State, Action], list[tuple[float, float]]]:
     state_action_returns_and_ratios = {}
 
+    action_map = {action_name: i for i, action_name in enumerate(set(actions))}
+
     cumulative_returns = []
     G = 0
     # Calculate cumulative returns (discounted sum of future rewards)
@@ -126,17 +128,7 @@ def is_mc_estimate_with_ratios(
 
     for t in range(len(states)):
         state = tuple(states[t]) if isinstance(states[t], list) else states[t]
-        action = actions[t]
-
-        # Ensure action is an integer
-        if not isinstance(action, int):
-            raise ValueError("Action must be an integer")
-
-        # Ensure state is hashable
-        try:
-            hash(state)
-        except TypeError:
-            raise ValueError("State must be hashable")
+        action = action_map[actions[t]]
 
         target_prob = target_policy.get(state, {}).get(action, 0)
         behavior_prob = behaviour_policy.get(state, {}).get(action, 0)
