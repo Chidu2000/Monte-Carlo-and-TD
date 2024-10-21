@@ -73,7 +73,7 @@ class Sarsa(Agent):
 
         self.q_values[(prev_state, prev_action)] += self.alpha * (q_update - self.q_values[(prev_state, prev_action)])
 
-        action = self.policy(prev_state)
+        action = self.policy(current_state)
 
         return action
 
@@ -89,7 +89,6 @@ class QLearningAgent(Agent):
         if (prev_state, prev_action) not in self.q_values:
             self.q_values[(prev_state, prev_action)] = 0
 
-        # Q-value update for terminal and non-terminal states
         if done:
             q_update = reward  
         else:
@@ -132,6 +131,10 @@ def train_episode(agent: Agent, env: RaceTrack) -> tuple[list[State], list[Actio
 
         next_state, reward, done, _ = env.step(action)
         rewards.append(reward)
+        
+        if done:
+            states.append(next_state)
+            rewards.append(0)
 
         prev_state = state
         prev_action = action
