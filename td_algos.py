@@ -136,7 +136,10 @@ def train_episode(agent: Agent, env: RaceTrack) -> tuple[list[State], list[Actio
 
         # Take a step in the environment, check both `done` and `truncated`
         next_state, reward, done, truncated = env.step(action)
-        rewards.append(reward)
+        
+        # Only append reward if the episode is not done or truncated
+        if not (done or truncated):
+            rewards.append(reward)
 
         # Update previous state, action, and reward
         prev_state = state
@@ -148,6 +151,7 @@ def train_episode(agent: Agent, env: RaceTrack) -> tuple[list[State], list[Actio
         step_count += 1  # Increment step count
 
     return states, actions, rewards
+
 
 
 
