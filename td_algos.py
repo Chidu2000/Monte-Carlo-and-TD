@@ -88,11 +88,10 @@ class QLearningAgent(Agent):
         
     def agent_step(self, prev_state: State, prev_action: Action, reward: float, current_state: State, done: bool) -> Action:
         if (prev_state, prev_action) not in self.q_values:
-            self.q_values[(prev_state, prev_action)] = 0
+            self.q_values[(prev_state, prev_action)] = 0.0  # Ensure it's a float
 
-        # Q-value update for terminal and non-terminal states
         if done:
-            q_update = reward  
+            q_update = reward  # No future reward if done
         else:
             max_q = max([self.q_values.get((current_state, a), 0) for a in range(self.nA)])
             q_update = reward + self.gamma * max_q  # Q-learning update rule
@@ -105,9 +104,10 @@ class QLearningAgent(Agent):
             q_values = [self.q_values.get((current_state, a), 0) for a in range(self.nA)]
             max_q = max(q_values)
             best_actions = [i for i, q in enumerate(q_values) if q == max_q]
-            next_action = np.random.choice(best_actions)  # Choose the best action
+            next_action = np.random.choice(best_actions)  # Choose one of the best actions
 
         return next_action
+
 
 
 
