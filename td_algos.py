@@ -42,14 +42,13 @@ class Agent():
         raise NotImplementedError
 
 class Sarsa(Agent):
-    def __init__(self, epsilon=0.1, gamma=0.4, alpha=0.1):
+    def __init__(self, epsilon=0.1, gamma=0.4, alpha=0.01):
         self.q_values = {}
         self.gamma = gamma  # Discount factor
         self.alpha = alpha  # Learning rate
         self.epsilon = epsilon  # Epsilon for epsilon-greedy policy
 
     def policy(self, state: State) -> Action:
-        # Epsilon-greedy policy: Explore or exploit
         if np.random.rand() < self.epsilon:
             return np.random.randint(0, 9)  # Explore: Random action
         else:
@@ -59,25 +58,20 @@ class Sarsa(Agent):
             return np.random.choice(best_actions)  # Exploit: Best action
 
     def agent_step(self, prev_state: State, prev_action: Action, prev_reward: float, current_state: State, done: bool) -> Action:
-        # Initialize Q-value for the previous state-action pair if not already present
         if (prev_state, prev_action) not in self.q_values:
             self.q_values[(prev_state, prev_action)] = 0
 
-        # Choose the next action using the policy
         next_action = self.policy(current_state)
 
-        # Q-value update: Only consider next state-action pair if not done
         if not done:
             if (current_state, next_action) not in self.q_values:
                 self.q_values[(current_state, next_action)] = 0
             
-            # Q-learning update (Sarsa: on-policy method, updates based on next action)
             q_update = prev_reward + self.gamma * self.q_values[(current_state, next_action)]
         else:
             # If terminal state, no future reward expected
             q_update = prev_reward
 
-        # Update the Q-value for the previous state-action pair
         self.q_values[(prev_state, prev_action)] += self.alpha * (q_update - self.q_values[(prev_state, prev_action)])
 
         return next_action
