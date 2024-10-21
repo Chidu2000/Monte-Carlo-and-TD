@@ -71,7 +71,7 @@ def make_eps_greedy_policy(state_action_values: ActionValueDict, epsilon: float)
             best_actions = [i for i, value in enumerate(action_values) if value == max_value]
             action = np.random.choice(best_actions)
         
-        return action
+        return int(action)
 
     return policy
 
