@@ -100,9 +100,11 @@ def generate_episode(policy: Policy, env: RaceTrack) -> tuple[list[State], list[
 
 def make_eps_greedy_policy_distribution(state_action_values: ActionValueDict, epsilon: float) -> DistributionPolicy:
     n_actions = 9
-    state_values = qs_from_q(state_action_values)
 
     def policy(state: State) -> list[float]:
+        if epsilon == 1:
+            return [1.0 / n_actions] * n_actions  # Uniform distribution for epsilon = 1
+
         action_probabilities = np.zeros(n_actions)
         q_values = [state_action_values.get((state, a), 0) for a in range(n_actions)]
         max_q_value = max(q_values)
@@ -116,6 +118,9 @@ def make_eps_greedy_policy_distribution(state_action_values: ActionValueDict, ep
         return action_probabilities
 
     return policy
+
+
+
 
 
 def convert_to_sampling_policy(distribution_policy: DistributionPolicy) -> Policy:
