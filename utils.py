@@ -60,6 +60,8 @@ def make_eps_greedy_policy(state_action_values: ActionValueDict, epsilon: float)
     state_values = qs_from_q(state_action_values)
 
     def policy(state: State) -> Action:
+        state = tuple(state) if isinstance(state, list) else state
+        
         action_values = [state_action_values.get((state, action), 0) for action in range(n_actions)]
 
         if np.random.random() < epsilon:
