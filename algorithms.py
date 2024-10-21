@@ -27,7 +27,8 @@ def fv_mc_estimation(states: list[State], actions: list[Action], rewards: list[f
     first_visit_indices = {}
 
     for step, (state, action) in enumerate(zip(states, actions)):
-        state_action = (state, action)
+        state = tuple(state) if isinstance(state, list) else state
+        state_action = (*state, action)
 
         # Check if this state-action pair has been encountered before
         if state_action not in first_visit_indices:
