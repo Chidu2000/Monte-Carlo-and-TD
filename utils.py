@@ -57,13 +57,12 @@ def random_argmax(value_list: list) -> np.ndarray:
 
 def make_eps_greedy_policy(state_action_values: ActionValueDict, epsilon: float) -> Policy:
     n_actions = 9  # Number of possible actions
-    state_values = qs_from_q(state_action_values)
 
     def policy(state: State) -> Action:
         state = tuple(state) if isinstance(state, list) else state
-        
-        action_values = [state_action_values.get((state, action), 0) for action in range(n_actions)]
-        
+
+        action_values = [state_action_values.get((*state, action), 0) for action in range(n_actions)]
+
         if epsilon == 0:
             max_value = max(action_values)
             best_actions = [i for i, value in enumerate(action_values) if value == max_value]
@@ -72,12 +71,12 @@ def make_eps_greedy_policy(state_action_values: ActionValueDict, epsilon: float)
             if np.random.random() < epsilon:
                 return int(np.random.choice(range(n_actions)))
             else:
-                # With probability 1 - epsilon, choose the greedy action
                 max_value = max(action_values)
                 best_actions = [i for i, value in enumerate(action_values) if value == max_value]
                 return int(np.random.choice(best_actions))
-        
+
     return policy
+
 
 
 
