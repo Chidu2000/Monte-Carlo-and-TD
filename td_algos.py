@@ -70,7 +70,8 @@ class Sarsa(Agent):
         else:
             q_update = prev_reward
 
-        self.q_values[(prev_state, prev_action)] += self.alpha * (q_update - self.q_values[(prev_state, prev_action)])
+        td_error = q_update - self.q_values[(prev_state, prev_action)]
+        self.q_values[(prev_state, prev_action)] += self.alpha * td_error
 
         action = self.policy(current_state)
 
