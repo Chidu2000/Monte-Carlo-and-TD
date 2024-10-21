@@ -133,7 +133,7 @@ def train_episode(agent: Agent, env: RaceTrack) -> tuple[list[State], list[Actio
             action = agent.agent_step(prev_state, prev_action, prev_reward, state, done)
 
         actions.append(action)
-        next_state, reward, done, truncated, _ = env.step(action)  
+        next_state, reward, done, truncated = env.step(action)  
 
         rewards.append(float(reward))  
 
