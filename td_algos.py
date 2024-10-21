@@ -121,7 +121,9 @@ def train_episode(agent: Agent, env: RaceTrack) -> tuple[list[State], list[Actio
     prev_action = None
     prev_reward = 0
 
-    while not done:
+    step_count = 0  # Track the number of steps
+
+    while not done and step_count < 201:  
         states.append(state)
 
         if prev_action is not None:
@@ -138,8 +140,10 @@ def train_episode(agent: Agent, env: RaceTrack) -> tuple[list[State], list[Actio
         prev_reward = reward
 
         state = next_state
+        step_count += 1  # Increment step count
 
     return states, actions, rewards
+
 
 
 def td_control(env: RaceTrack, agent_class: type[Agent], info: dict[str, Any], num_episodes: int) -> tuple[list[float, Agent]]:
