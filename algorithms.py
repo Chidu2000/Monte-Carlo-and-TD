@@ -112,7 +112,7 @@ def is_mc_estimate_with_ratios(
     target_policy: DistributionPolicy,
     behaviour_policy: DistributionPolicy,
     discount: float
-) -> dict[StateAction, list[tuple[float, float]]]:
+) -> dict[tuple[State, Action], list[tuple[float, float]]]:
     state_action_returns_and_ratios = {}
 
     cumulative_returns = []
@@ -122,20 +122,18 @@ def is_mc_estimate_with_ratios(
         cumulative_returns.append(G)
     cumulative_returns.reverse()
 
-    # Calculate importance sampling ratios and estimates
     importance_sampling_ratios = []
     for t in range(len(states)):
-        # Assuming states[t] and actions[t] are immutable or made immutable
         state = tuple(states[t]) if isinstance(states[t], list) else states[t]
         action = actions[t]
 
         target_prob = target_policy(state)[action]
         behavior_prob = behaviour_policy(state)[action]
+
         ratio = target_prob / behavior_prob if behavior_prob > 0 else 0
         importance_sampling_ratios.append(ratio)
 
     for t in range(len(states)):
-        # Convert state-action pair to immutable type if necessary
         state_action = (tuple(states[t]) if isinstance(states[t], list) else states[t], actions[t])
         
         if state_action not in state_action_returns_and_ratios:
@@ -146,6 +144,7 @@ def is_mc_estimate_with_ratios(
         )
 
     return state_action_returns_and_ratios
+
 
 
 
