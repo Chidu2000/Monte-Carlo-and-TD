@@ -130,8 +130,8 @@ def is_mc_estimate_with_ratios(
         action = actions[t]
 
         # Fetch probabilities from both policies
-        target_prob = target_policy(state)[action]
-        behavior_prob = behaviour_policy(state)[action]
+        target_prob = target_policy(*state)[action]
+        behavior_prob = behaviour_policy(*state)[action]
 
         # Calculate the importance sampling ratio
         ratio = target_prob / behavior_prob if behavior_prob > 0 else 0
