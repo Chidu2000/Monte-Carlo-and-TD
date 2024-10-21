@@ -67,18 +67,16 @@ def make_eps_greedy_policy(state_action_values: ActionValueDict, epsilon: float)
         if epsilon == 0:
             max_value = max(action_values)
             best_actions = [i for i, value in enumerate(action_values) if value == max_value]
-            action = np.random.choice(best_actions)
+            return int(np.random.choice(best_actions))
         else:
             if np.random.random() < epsilon:
-                action = np.random.choice(range(n_actions))
+                return int(np.random.choice(range(n_actions)))
             else:
                 # With probability 1 - epsilon, choose the greedy action
                 max_value = max(action_values)
                 best_actions = [i for i, value in enumerate(action_values) if value == max_value]
-                action = np.random.choice(best_actions)
+                return int(np.random.choice(best_actions))
         
-        return int(action)  # Ensure the action is returned as an integer
-
     return policy
 
 
