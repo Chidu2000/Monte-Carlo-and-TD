@@ -73,7 +73,7 @@ class Sarsa(Agent):
 
         self.q_values[(prev_state, prev_action)] += self.alpha * (q_update - self.q_values[(prev_state, prev_action)])
 
-        action = self.policy(prev_state)
+        action = self.policy(current_state)
 
         return action
 
