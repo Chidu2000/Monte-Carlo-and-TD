@@ -117,30 +117,29 @@ def train_episode(agent: Agent, env: RaceTrack) -> tuple[list[State], list[Actio
     rewards = []
     actions = []
 
-    state = env.reset()  # Ignore info; unpack the initial state
+    state = env.reset()  
     done = False
     truncated = False
     prev_state = state
     prev_action = None
-    prev_reward = 0.0  # Ensure it's a float
+    prev_reward = 0.0  
 
     while not (done or truncated):
         states.append(state)
 
-        # Select action using the agent's policy or random action for the first step
-        if prev_action is not None:
-            action = agent.agent_step(prev_state, prev_action, prev_reward, state, done)
+        if prev_action is None:  
+            action = np.random.randint(0, env.nA)  
         else:
-            action = np.random.randint(0, env.nA)  # Initial action using the action space size
+            action = agent.agent_step(prev_state, prev_action, prev_reward, state, done)
 
         actions.append(action)
-        
-        # Step the environment with the chosen action
-        next_state, reward, done, truncated = env.step(action)
+        next_state, reward, done, truncated, _ = env.step(action)  
 
-        rewards.append(float(reward))  # Ensure reward is a float
+        rewards.append(float(reward))  
 
-        # Update previous state, action, and reward for the next iteration
+        if truncated:
+            break  # Exit loop when truncated
+
         prev_state = state
         prev_action = action
         prev_reward = reward
