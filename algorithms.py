@@ -118,38 +118,37 @@ def is_mc_estimate_with_ratios(
 
     cumulative_returns = []
     G = 0
+    # Calculate cumulative returns (discounted sum of future rewards)
     for t in reversed(range(len(rewards))):
         G = rewards[t] + discount * G
         cumulative_returns.append(G)
     cumulative_returns.reverse()
 
-    # Calculate importance sampling ratios and estimates
-    importance_sampling_ratios = []
+    # Calculate importance sampling ratios for each timestep
     for t in range(len(states)):
-        state = tuple(states[t]) if isinstance(states[t], list) else states[t]  # Ensure state is a tuple
+        # Ensure state is a tuple (if necessary)
+        state = tuple(states[t]) if isinstance(states[t], list) else states[t]
         action = actions[t]
 
-        # Fetch probabilities from both policies
+        # Fetch the probability of the action from both the target and behavior policies
         target_prob = target_policy(state)[action]
         behavior_prob = behaviour_policy(state)[action]
 
-        # Calculate the importance sampling ratio
+        # Calculate importance sampling ratio
         ratio = target_prob / behavior_prob if behavior_prob > 0 else 0
-        importance_sampling_ratios.append(ratio)
 
-    # Build the dictionary of state-action pairs and their returns and ratios
-    for t in range(len(states)):
-        state_action = (tuple(states[t]) if isinstance(states[t], list) else states[t], actions[t])
-        
+        # Create the (state, action) key for the dictionary
+        state_action = (state, action)
+
+        # Add the cumulative return and ratio for the current (state, action)
         if state_action not in state_action_returns_and_ratios:
             state_action_returns_and_ratios[state_action] = []
-
-        # Append the cumulative return and importance sampling ratio as a tuple
         state_action_returns_and_ratios[state_action].append(
-            (cumulative_returns[t], importance_sampling_ratios[t])
+            (cumulative_returns[t], ratio)
         )
 
     return state_action_returns_and_ratios
+
 
 
 
