@@ -107,25 +107,27 @@ def generate_episode(policy: Policy, env: RaceTrack) -> tuple[list[State], list[
 def make_eps_greedy_policy_distribution(state_action_values: ActionValueDict, epsilon: float) -> DistributionPolicy:
     n_actions = 9
 
-    def policy(state: State) -> list[float]:
-        if epsilon == 1:
-            # Uniform distribution for epsilon = 1
-            return [1.0 / n_actions] * n_actions  
+    def policy(state: State) -> np.ndarray:
+        q_values = np.array([state_action_values.get((*state, a), 0) for a in range(n_actions)])
+        max_q_value = np.max(q_values)
+        
+        # Start with equal probabilities for all actions
+        action_probabilities = np.full(n_actions, epsilon / n_actions)
 
-        action_probabilities = np.zeros(n_actions)
-        # Assuming state is a tuple or list with more than one element
-        q_values = [state_action_values.get((*state, a), 0) for a in range(n_actions)]  # Fix key lookup
-        max_q_value = max(q_values)
+        # Identify all actions with the maximum Q-value
+        best_actions = np.where(q_values == max_q_value)[0]
+        n_best_actions = len(best_actions)
+        
+        # Update the probabilities for the best actions
+        action_probabilities[best_actions] += (1.0 - epsilon) / n_best_actions
 
-        for a in range(n_actions):
-            if q_values[a] == max_q_value:
-                action_probabilities[a] = (1 - epsilon) / len([q for q in q_values if q == max_q_value]) + epsilon / n_actions
-            else:
-                action_probabilities[a] = epsilon / n_actions
+        # Ensure the probabilities sum to 1 (to handle floating point precision)
+        action_probabilities /= np.sum(action_probabilities)
 
         return action_probabilities
 
     return policy
+
 
 
 
