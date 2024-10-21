@@ -133,7 +133,7 @@ def train_episode(agent: Agent, env: RaceTrack) -> tuple[list[State], list[Actio
             action = np.random.randint(0, 9)  # Initial action
 
         actions.append(action)
-        next_state, reward, done, truncated, _ = env.step(action)  # Ignore info
+        next_state, reward, done, truncated = env.step(action)  # Ignore info
 
         if truncated:
             reward = -500.0  # Penalty for running out of time
