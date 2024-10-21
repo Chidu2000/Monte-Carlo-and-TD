@@ -125,13 +125,19 @@ def is_mc_estimate_with_ratios(
     # Calculate importance sampling ratios and estimates
     importance_sampling_ratios = []
     for t in range(len(states)):
-        target_prob = target_policy(states[t])[actions[t]]
-        behavior_prob = behaviour_policy(states[t])[actions[t]]
+        # Assuming states[t] and actions[t] are immutable or made immutable
+        state = tuple(states[t]) if isinstance(states[t], list) else states[t]
+        action = actions[t]
+
+        target_prob = target_policy(state)[action]
+        behavior_prob = behaviour_policy(state)[action]
         ratio = target_prob / behavior_prob if behavior_prob > 0 else 0
         importance_sampling_ratios.append(ratio)
 
     for t in range(len(states)):
-        state_action = (states[t], actions[t])
+        # Convert state-action pair to immutable type if necessary
+        state_action = (tuple(states[t]) if isinstance(states[t], list) else states[t], actions[t])
+        
         if state_action not in state_action_returns_and_ratios:
             state_action_returns_and_ratios[state_action] = []
 
@@ -140,6 +146,7 @@ def is_mc_estimate_with_ratios(
         )
 
     return state_action_returns_and_ratios
+
 
 
 def ev_mc_off_policy_control(env: RaceTrack, behaviour_policy: DistributionPolicy, epsilon: float, num_episodes: int, discount: float):
