@@ -107,18 +107,17 @@ def fv_mc_control(env: RaceTrack, epsilon: float, num_episodes: int, discount: f
 
 
 def is_mc_estimate_with_ratios(
-    states: list[*State],
+    states: list[State],
     actions: list[Action],
     rewards: list[float],
     target_policy: DistributionPolicy,
     behaviour_policy: DistributionPolicy,
     discount: float
-) -> dict[tuple[*State, Action], list[tuple[float, float]]]:
+) -> dict[tuple[State, Action], list[tuple[float, float]]]:
     state_action_returns_and_ratios = {}
 
     cumulative_returns = []
     G = 0
-    # Calculate cumulative returns
     for t in reversed(range(len(rewards))):
         G = rewards[t] + discount * G
         cumulative_returns.append(G)
