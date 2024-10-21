@@ -60,21 +60,22 @@ class Sarsa(Agent):
     def agent_step(self, prev_state: State, prev_action: Action, prev_reward: float, current_state: State, done: bool) -> Action:
         if (prev_state, prev_action) not in self.q_values:
             self.q_values[(prev_state, prev_action)] = 0
-
-        next_action = self.policy(current_state)
-
+    
         if not done:
+            next_action = self.policy(current_state)
             if (current_state, next_action) not in self.q_values:
                 self.q_values[(current_state, next_action)] = 0
             
             q_update = prev_reward + self.gamma * self.q_values[(current_state, next_action)]
         else:
-            # If terminal state, no future reward expected
             q_update = prev_reward
 
         self.q_values[(prev_state, prev_action)] += self.alpha * (q_update - self.q_values[(prev_state, prev_action)])
 
-        return next_action
+        action = self.policy(current_state)
+
+        return action
+
 
 
 
