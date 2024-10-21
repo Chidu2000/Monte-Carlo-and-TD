@@ -60,36 +60,29 @@ def make_eps_greedy_policy(state_action_values: ActionValueDict, epsilon: float)
     state_values = qs_from_q(state_action_values)
 
     def policy(state: State) -> Action:
-        state = tuple(state) if isinstance(state, list) else state
         action_values = [state_action_values.get((state, action), 0) for action in range(n_actions)]
 
-        if epsilon == 0:  
+        if np.random.random() < epsilon:
+            action = np.random.choice(range(n_actions))
+        else:
             max_value = max(action_values)
             best_actions = [i for i, value in enumerate(action_values) if value == max_value]
-            action = np.random.choice(best_actions)  # Choose among the best actions randomly if there's a tie
-        else:
-            if np.random.random() < epsilon:
-                action = np.random.choice(range(n_actions))  # Explore
-            else:
-                max_value = max(action_values)
-                best_actions = [i for i, value in enumerate(action_values) if value == max_value]
-                action = np.random.choice(best_actions)  # Exploit
-
+            action = np.random.choice(best_actions)
+        
         return action
 
     return policy
 
 
-def generate_episode(policy: Policy, env: RaceTrack, max_steps: int = 201) -> tuple[list[State], list[Action], list[float]]:
+def generate_episode(policy: Policy, env: RaceTrack) -> tuple[list[State], list[Action], list[float]]:
     states = []
     rewards = []
     actions = []
 
     state = env.reset()
     done = False  # To check if the episode is done
-    step_count = 0
 
-    while not done and step_count < max_steps:
+    while not done:
         states.append(state)
 
         action = policy(state)
@@ -101,39 +94,28 @@ def generate_episode(policy: Policy, env: RaceTrack, max_steps: int = 201) -> tu
         rewards.append(reward)
 
         state = next_state
-        step_count += 1
 
     return states, actions, rewards
 
 
-
 def make_eps_greedy_policy_distribution(state_action_values: ActionValueDict, epsilon: float) -> DistributionPolicy:
     n_actions = 9
+    state_values = qs_from_q(state_action_values)
 
     def policy(state: State) -> list[float]:
         action_probabilities = np.zeros(n_actions)
         q_values = [state_action_values.get((state, a), 0) for a in range(n_actions)]
         max_q_value = max(q_values)
 
-        # Find the actions with the maximum Q-value
-        best_actions = [a for a in range(n_actions) if q_values[a] == max_q_value]
-
-        if epsilon == 0:
-            # When epsilon = 0, be purely greedy: 100% probability on best actions
-            for a in best_actions:
-                action_probabilities[a] = 1 / len(best_actions)
-        else:
-            # Assign probabilities to each action based on epsilon-greedy strategy
-            for a in range(n_actions):
-                if a in best_actions:
-                    action_probabilities[a] = (1 - epsilon) / len(best_actions) + epsilon / n_actions
-                else:
-                    action_probabilities[a] = epsilon / n_actions
+        for a in range(n_actions):
+            if q_values[a] == max_q_value:
+                action_probabilities[a] = (1 - epsilon) / len([q for q in q_values if q == max_q_value]) + epsilon / n_actions
+            else:
+                action_probabilities[a] = epsilon / n_actions
 
         return action_probabilities
 
     return policy
-
 
 
 def convert_to_sampling_policy(distribution_policy: DistributionPolicy) -> Policy:
