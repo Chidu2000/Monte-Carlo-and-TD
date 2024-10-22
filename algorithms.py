@@ -137,8 +137,8 @@ def is_mc_estimate_with_ratios(
         state_action = (state, action)
 
         if state_action not in state_action_returns_and_ratios:
-            state_action_returns_and_ratios[state_action] = []
-        state_action_returns_and_ratios[state_action].append(
+            state_action_returns_and_ratios[state] = []
+        state_action_returns_and_ratios[state].append(
             (cumulative_returns[t], ratio)
         )
 
