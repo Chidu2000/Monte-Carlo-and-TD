@@ -87,7 +87,8 @@ class QLearningAgent(Agent):
             max_q = max([self.q_values.get((current_state, a), 0) for a in range(self.nA)])
             q_update = reward + self.gamma * max_q  # Q-learning update rule
 
-        self.q_values[(prev_state, prev_action)] += self.alpha * (q_update - self.q_values[(prev_state, prev_action)])
+        current_q = self.q_values[(prev_state, prev_action)]
+        self.q_values[(prev_state, prev_action)] = current_q + self.alpha * (q_update - current_q)
 
         policy = self.get_current_policy()
         next_action = policy(current_state)
