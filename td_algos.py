@@ -48,7 +48,7 @@ class Sarsa(Agent):
         self.epsilon = epsilon  # Epsilon for epsilon-greedy policy
 
     def agent_step(self, prev_state: State, prev_action: Action, prev_reward: float, current_state: State, done: bool) -> Action:
-        prev_state_action = (prev_state, prev_action)
+        prev_state_action = (*prev_state, prev_action)
 
         if prev_state_action not in self.q:
             self.q[prev_state_action] = 0
@@ -56,7 +56,7 @@ class Sarsa(Agent):
         if not done:
             policy = self.get_current_policy()
             next_action = policy(current_state)
-            current_state_action = (current_state, next_action)
+            current_state_action = (*current_state, next_action)
 
             if current_state_action not in self.q:
                 self.q[current_state_action] = 0
@@ -80,16 +80,17 @@ class QLearningAgent(Agent):
         self.nA = 9
         
     def agent_step(self, prev_state: State, prev_action: Action, reward: float, current_state: State, done: bool) -> Action:
-        if (prev_state, prev_action) not in self.q:
-            self.q[(prev_state, prev_action)] = 0.0  
+        prev_state_action = (*prev_state, prev_action)
+        if prev_state_action not in self.q:
+            self.q[prev_state_action] = 0.0  
 
         if done:
             q_update = reward  # No future reward if done
         else:
-            max_q = max([self.q.get((current_state, a), 0) for a in range(self.nA)])
+            max_q = max([self.q.get((*current_state, a), 0) for a in range(self.nA)])
             q_update = reward + self.gamma * max_q  # Q-learning update rule
 
-        self.q[(prev_state, prev_action)] += self.alpha * (q_update - self.q[(prev_state, prev_action)])
+        self.q[prev_state_action] += self.alpha * (q_update - self.q[prev_state_action])
 
         policy = self.get_current_policy()
         next_action = policy(current_state)
