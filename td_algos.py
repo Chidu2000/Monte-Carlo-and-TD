@@ -49,25 +49,29 @@ class Sarsa(Agent):
         self.epsilon = epsilon  # Epsilon for epsilon-greedy policy
 
     def agent_step(self, prev_state: State, prev_action: Action, prev_reward: float, current_state: State, done: bool) -> Action:
-        if (prev_state, prev_action) not in self.q_values:
-            self.q_values[(*prev_state, prev_action)] = 0
-        
+        prev_state_action = (*prev_state, prev_action)
+
+        if prev_state_action not in self.q_values:
+            self.q_values[prev_state_action] = 0
+
         if not done:
             policy = self.get_current_policy()
             next_action = policy(current_state)
-            
-            if (*current_state, next_action) not in self.q_values:
-                self.q_values[(*current_state, next_action)] = 0
+            current_state_action = (*current_state, next_action)
 
-            q_update = prev_reward + self.gamma * self.q_values[(*current_state, next_action)]
+            if current_state_action not in self.q_values:
+                self.q_values[current_state_action] = 0
+
+            q_update = prev_reward + self.gamma * self.q_values[current_state_action]
         else:
-            q_update = prev_reward
+            q_update = prev_reward  # If done, no future reward
 
-        td_error = q_update - self.q_values[(*prev_state, prev_action)]
-        
-        self.q_values[(*prev_state, prev_action)] += self.alpha * td_error
+        td_error = q_update - self.q_values[prev_state_action]
+
+        self.q_values[prev_state_action] += self.alpha * td_error
 
         return next_action if not done else None
+
 
 
 class QLearningAgent(Agent):
@@ -133,7 +137,6 @@ def td_control(env: RaceTrack, agent_class: type[Agent], info: dict[str, Any], n
     agent = agent_class()
     agent.agent_init(info)
 
-    # Set seed
     seed = info['seed']
     np.random.seed(seed)
     random.seed(seed)
