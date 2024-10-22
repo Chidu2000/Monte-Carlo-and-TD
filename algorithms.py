@@ -116,6 +116,7 @@ def is_mc_estimate_with_ratios(
 ) -> dict[tuple[State, Action], list[tuple[float, float]]]:
     state_action_returns_and_ratios = {}
 
+    # Calculate cumulative returns (discounted rewards)
     cumulative_returns = []
     G = 0
     for t in reversed(range(len(rewards))):
@@ -123,24 +124,40 @@ def is_mc_estimate_with_ratios(
         cumulative_returns.append(G)
     cumulative_returns.reverse()
 
+    # Keep track of visited state-action pairs for first-visit only
+    visited = set()
+
+    # Loop through all time steps
     for t in range(len(states)):
         state = tuple(states[t]) if isinstance(states[t], list) else states[t]
-        action = actions[t]  # Use action directly instead of mapping it
+        action = actions[t]  # Use action directly
 
-        target_prob = target_policy(state)[action]
-        behavior_prob = behaviour_policy(state)[action]
-
-        ratio = target_prob / behavior_prob if behavior_prob > 0 else 0
-
+        # Create the state-action key
         state_action = (state, action)
 
-        if state_action not in state_action_returns_and_ratios:
-            state_action_returns_and_ratios[state_action] = []
-        state_action_returns_and_ratios[state_action].append(
-            (cumulative_returns[t], ratio)
-        )
+        # Only process the first occurrence of each state-action pair
+        if state_action not in visited:
+            visited.add(state_action)
 
+            # Get probabilities from both policies
+            target_prob = target_policy(state)[action]
+            behavior_prob = behaviour_policy(state)[action]
+
+            # Calculate importance sampling ratio
+            ratio = target_prob / behavior_prob if behavior_prob > 0 else 0
+
+            # Append the cumulative return and ratio for this time step
+            if state_action not in state_action_returns_and_ratios:
+                state_action_returns_and_ratios[state_action] = []
+
+            # Store both cumulative return and ratio as a tuple (for first occurrence)
+            state_action_returns_and_ratios[state_action].append(
+                (cumulative_returns[t], ratio)
+            )
+
+    # Return the dictionary with state-action keys and their associated returns/ratios
     return state_action_returns_and_ratios
+
 
 
 
