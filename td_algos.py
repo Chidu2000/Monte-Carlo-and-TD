@@ -43,7 +43,6 @@ class Agent():
 
 class Sarsa(Agent):
     def __init__(self, epsilon=0.05, gamma=0.99, alpha=0.1):
-        self.q_values = {}
         self.gamma = gamma  # Discount factor
         self.alpha = alpha  # Learning rate
         self.epsilon = epsilon  # Epsilon for epsilon-greedy policy
@@ -51,24 +50,25 @@ class Sarsa(Agent):
     def agent_step(self, prev_state: State, prev_action: Action, prev_reward: float, current_state: State, done: bool) -> Action:
         prev_state_action = (*prev_state, prev_action)
 
-        if prev_state_action not in self.q_values:
-            self.q_values[prev_state_action] = 0
+        if prev_state_action not in self.q:
+            self.q[prev_state_action] = 0
 
         if not done:
             policy = self.get_current_policy()
             next_action = policy(current_state)
+            assert len(current_state) == 4
             current_state_action = (*current_state, next_action)
 
-            if current_state_action not in self.q_values:
-                self.q_values[current_state_action] = 0
+            if current_state_action not in self.q:
+                self.q[current_state_action] = 0
 
-            q_update = prev_reward + self.gamma * self.q_values[current_state_action]
+            q_update = prev_reward + self.gamma * self.q[current_state_action]
         else:
             q_update = prev_reward  # If done, no future reward
 
-        td_error = q_update - self.q_values[prev_state_action]
+        td_error = q_update - self.q[prev_state_action]
 
-        self.q_values[prev_state_action] += self.alpha * td_error
+        self.q[prev_state_action] += self.alpha * td_error
 
         return next_action if not done else None
 
@@ -76,22 +76,21 @@ class Sarsa(Agent):
 
 class QLearningAgent(Agent):
     def __init__(self):
-        self.q_values = {}
         self.gamma = 0.99
         self.alpha = 0.1
         self.nA = 9
         
     def agent_step(self, prev_state: State, prev_action: Action, reward: float, current_state: State, done: bool) -> Action:
-        if (prev_state, prev_action) not in self.q_values:
-            self.q_values[(prev_state, prev_action)] = 0.0  
+        if (prev_state, prev_action) not in self.q:
+            self.q[(prev_state, prev_action)] = 0.0  
 
         if done:
             q_update = reward  # No future reward if done
         else:
-            max_q = max([self.q_values.get((*current_state, a), 0) for a in range(self.nA)])
+            max_q = max([self.q.get((*current_state, a), 0) for a in range(self.nA)])
             q_update = reward + self.gamma * max_q  # Q-learning update rule
 
-        self.q_values[(prev_state, prev_action)] += self.alpha * (q_update - self.q_values[(prev_state, prev_action)])
+        self.q[(prev_state, prev_action)] += self.alpha * (q_update - self.q[(prev_state, prev_action)])
 
         policy = self.get_current_policy()
         next_action = policy(current_state)
