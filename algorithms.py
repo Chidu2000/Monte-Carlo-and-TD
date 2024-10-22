@@ -113,10 +113,8 @@ def is_mc_estimate_with_ratios(
     target_policy: DistributionPolicy,
     behaviour_policy: DistributionPolicy,
     discount: float
-) -> dict[tuple[tuple | State, Action], list[tuple[float, float]]]:
+) -> dict[tuple[State, Action], list[tuple[float, float]]]:
     state_action_returns_and_ratios = {}
-
-    action_map = {action_name: i for i, action_name in enumerate(set(actions))}
 
     cumulative_returns = []
     G = 0
@@ -127,7 +125,7 @@ def is_mc_estimate_with_ratios(
 
     for t in range(len(states)):
         state = tuple(states[t]) if isinstance(states[t], list) else states[t]
-        action = action_map[actions[t]]
+        action = actions[t]  # Use action directly instead of mapping it
 
         target_prob = target_policy(state)[action]
         behavior_prob = behaviour_policy(state)[action]
@@ -137,12 +135,13 @@ def is_mc_estimate_with_ratios(
         state_action = (state, action)
 
         if state_action not in state_action_returns_and_ratios:
-            state_action_returns_and_ratios[state] = []
-        state_action_returns_and_ratios[state].append(
+            state_action_returns_and_ratios[state_action] = []
+        state_action_returns_and_ratios[state_action].append(
             (cumulative_returns[t], ratio)
         )
 
     return state_action_returns_and_ratios
+
 
 
 
