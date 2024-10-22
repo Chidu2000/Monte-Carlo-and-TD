@@ -62,6 +62,7 @@ class Sarsa(Agent):
             self.q_values[(prev_state, prev_action)] = 0
         
         if not done:
+            policy = self.get_current_policy()
             next_action = self.policy(current_state)
             
             if (current_state, next_action) not in self.q_values:
@@ -100,13 +101,8 @@ class QLearningAgent(Agent):
 
         self.q_values[(prev_state, prev_action)] += self.alpha * (q_update - self.q_values[(prev_state, prev_action)])
 
-        if np.random.rand() < self.epsilon:
-            next_action = np.random.randint(0, self.nA)  # Random action
-        else:
-            q_values = [self.q_values.get((current_state, a), 0) for a in range(self.nA)]
-            max_q = max(q_values)
-            best_actions = [i for i, q in enumerate(q_values) if q == max_q]
-            next_action = np.random.choice(best_actions)  # Choose one of the best actions
+        policy = self.get_current_policy()
+        next_action = policy(current_state)
 
         return next_action
 
@@ -128,15 +124,16 @@ def train_episode(agent: Agent, env: RaceTrack) -> tuple[list[State], list[Actio
     while not (done or truncated):
         states.append(state)
 
-        action = agent.get_current_policy()
+        # Use agent's `agent_step` to decide action
+        if prev_action is None:  
+            action = np.random.randint(0, env.nA)  # Random action if no previous action
+        else:
+            action = agent.agent_step(prev_state, prev_action, prev_reward, state, done)
 
         actions.append(action)
         next_state, reward, done, truncated = env.step(action)  
 
         rewards.append(float(reward))  
-
-        if truncated:
-            break  # Exit loop when truncated
 
         prev_state = state
         prev_action = action
@@ -144,6 +141,7 @@ def train_episode(agent: Agent, env: RaceTrack) -> tuple[list[State], list[Actio
         state = next_state
 
     return states, actions, rewards
+
 
 
 def td_control(env: RaceTrack, agent_class: type[Agent], info: dict[str, Any], num_episodes: int) -> tuple[list[float, Agent]]:
