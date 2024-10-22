@@ -42,10 +42,8 @@ class Agent():
         raise NotImplementedError
 
 class Sarsa(Agent):
-    def __init__(self, epsilon=0.05, gamma=0.99, alpha=0.1):
-        self.gamma = gamma  # Discount factor
-        self.alpha = alpha  # Learning rate
-        self.epsilon = epsilon  # Epsilon for epsilon-greedy policy
+    def __init__(self):
+        super().__init__()
 
     def agent_step(self, prev_state: State, prev_action: Action, prev_reward: float, current_state: State, done: bool) -> Action:
         prev_state_action = (*prev_state, prev_action)
@@ -61,13 +59,13 @@ class Sarsa(Agent):
             if current_state_action not in self.q:
                 self.q[current_state_action] = 0
 
-            q_update = prev_reward + self.gamma * self.q[current_state_action]
+            q_update = prev_reward + self.discount * self.q[current_state_action]
         else:
             q_update = prev_reward  # If done, no future reward
 
         td_error = q_update - self.q[prev_state_action]
 
-        self.q[prev_state_action] += self.alpha * td_error
+        self.q[prev_state_action] += self.step_size * td_error
 
         return next_action if not done else None
 
@@ -75,9 +73,7 @@ class Sarsa(Agent):
 
 class QLearningAgent(Agent):
     def __init__(self):
-        self.gamma = 0.99
-        self.alpha = 0.1
-        self.nA = 9
+        super().__init__()
         
     def agent_step(self, prev_state: State, prev_action: Action, reward: float, current_state: State, done: bool) -> Action:
         prev_state_action = (*prev_state, prev_action)
@@ -87,10 +83,10 @@ class QLearningAgent(Agent):
         if done:
             q_update = reward  # No future reward if done
         else:
-            max_q = max([self.q.get((*current_state, a), 0) for a in range(self.nA)])
-            q_update = reward + self.gamma * max_q  # Q-learning update rule
+            max_q = max([self.q.get((*current_state, a), 0) for a in range(9)])
+            q_update = reward + self.discount * max_q  # Q-learning update rule
 
-        self.q[prev_state_action] += self.alpha * (q_update - self.q[prev_state_action])
+        self.q[prev_state_action] += self.step_size * (q_update - self.q[prev_state_action])
 
         policy = self.get_current_policy()
         next_action = policy(current_state)
