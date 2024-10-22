@@ -56,7 +56,7 @@ class Sarsa(Agent):
             policy = self.get_current_policy()
             next_action = policy(current_state)
             
-            if (current_state, next_action) not in self.q_values:
+            if (*current_state, next_action) not in self.q_values:
                 self.q_values[(*current_state, next_action)] = 0
 
             q_update = prev_reward + self.gamma * self.q_values[(*current_state, next_action)]
@@ -78,16 +78,16 @@ class QLearningAgent(Agent):
         self.nA = 9
         
     def agent_step(self, prev_state: State, prev_action: Action, reward: float, current_state: State, done: bool) -> Action:
-        if (prev_state, prev_action) not in self.q_values:
-            self.q_values[(prev_state, prev_action)] = 0.0  
+        if (*prev_state, prev_action) not in self.q_values:
+            self.q_values[(*prev_state, prev_action)] = 0.0  
 
         if done:
             q_update = reward  # No future reward if done
         else:
-            max_q = max([self.q_values.get((current_state, a), 0) for a in range(self.nA)])
+            max_q = max([self.q_values.get((*current_state, a), 0) for a in range(self.nA)])
             q_update = reward + self.gamma * max_q  # Q-learning update rule
 
-        self.q_values[(prev_state, prev_action)] += self.alpha * (q_update - self.q_values[(prev_state, prev_action)])
+        self.q_values[(*prev_state, prev_action)] += self.alpha * (q_update - self.q_values[(*prev_state, prev_action)])
 
         policy = self.get_current_policy()
         next_action = policy(current_state)
