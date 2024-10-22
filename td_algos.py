@@ -50,22 +50,22 @@ class Sarsa(Agent):
 
     def agent_step(self, prev_state: State, prev_action: Action, prev_reward: float, current_state: State, done: bool) -> Action:
         if (prev_state, prev_action) not in self.q_values:
-            self.q_values[(prev_state, prev_action)] = 0
+            self.q_values[(*prev_state, prev_action)] = 0
         
         if not done:
             policy = self.get_current_policy()
             next_action = policy(current_state)
             
             if (current_state, next_action) not in self.q_values:
-                self.q_values[(current_state, next_action)] = 0
+                self.q_values[(*current_state, next_action)] = 0
 
-            q_update = prev_reward + self.gamma * self.q_values[(current_state, next_action)]
+            q_update = prev_reward + self.gamma * self.q_values[(*current_state, next_action)]
         else:
             q_update = prev_reward
 
-        td_error = q_update - self.q_values[(prev_state, prev_action)]
+        td_error = q_update - self.q_values[(*prev_state, prev_action)]
         
-        self.q_values[(prev_state, prev_action)] += self.alpha * td_error
+        self.q_values[(*prev_state, prev_action)] += self.alpha * td_error
 
         return next_action if not done else None
 
@@ -79,7 +79,7 @@ class QLearningAgent(Agent):
         
     def agent_step(self, prev_state: State, prev_action: Action, reward: float, current_state: State, done: bool) -> Action:
         if (prev_state, prev_action) not in self.q_values:
-            self.q_values[(prev_state, prev_action)] = 0.0  # Ensure it's a float
+            self.q_values[(prev_state, prev_action)] = 0.0  
 
         if done:
             q_update = reward  # No future reward if done
