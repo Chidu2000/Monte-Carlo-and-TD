@@ -70,9 +70,6 @@ class Sarsa(Agent):
         return next_action if not done else None
 
 
-
-
-
 class QLearningAgent(Agent):
     def __init__(self):
         self.q_values = {}
@@ -115,11 +112,8 @@ def train_episode(agent: Agent, env: RaceTrack) -> tuple[list[State], list[Actio
     while not (done or truncated):
         states.append(state)
 
-        # Use agent's `agent_step` to decide action
-        if prev_action is None:  
-            action = np.random.randint(0, env.nA)  # Random action if no previous action
-        else:
-            action = agent.agent_step(prev_state, prev_action, prev_reward, state, done)
+        policy = agent.get_current_policy()
+        action = policy(state)
 
         actions.append(action)
         next_state, reward, done, truncated = env.step(action)  
