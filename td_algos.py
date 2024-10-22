@@ -48,22 +48,13 @@ class Sarsa(Agent):
         self.alpha = alpha  # Learning rate
         self.epsilon = epsilon  # Epsilon for epsilon-greedy policy
 
-    def policy(self, state: State) -> Action:
-        if np.random.rand() < self.epsilon:
-            return np.random.randint(0, 9)  # Explore: Random action
-        else:
-            q_values = [self.q_values.get((*state, a), 0) for a in range(9)]
-            max_q = max(q_values)
-            best_actions = [i for i, q in enumerate(q_values) if q == max_q]
-            return np.random.choice(best_actions)  # Exploit: Best action
-
     def agent_step(self, prev_state: State, prev_action: Action, prev_reward: float, current_state: State, done: bool) -> Action:
         if (prev_state, prev_action) not in self.q_values:
             self.q_values[(prev_state, prev_action)] = 0
         
         if not done:
             policy = self.get_current_policy()
-            next_action = self.policy(current_state)
+            next_action = policy(current_state)
             
             if (current_state, next_action) not in self.q_values:
                 self.q_values[(current_state, next_action)] = 0
