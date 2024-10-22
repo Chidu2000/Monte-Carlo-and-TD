@@ -73,9 +73,10 @@ class Sarsa(Agent):
         td_error = q_update - self.q_values[(prev_state, prev_action)]
         self.q_values[(prev_state, prev_action)] += self.alpha * td_error
 
-        action = self.policy(current_state)
-
-        return action
+        if not done:
+            return next_action
+        else:
+            return None
 
 
 
@@ -146,11 +147,6 @@ def train_episode(agent: Agent, env: RaceTrack) -> tuple[list[State], list[Actio
         state = next_state
 
     return states, actions, rewards
-
-
-
-
-
 
 
 def td_control(env: RaceTrack, agent_class: type[Agent], info: dict[str, Any], num_episodes: int) -> tuple[list[float, Agent]]:
