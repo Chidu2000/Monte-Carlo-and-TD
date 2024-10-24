@@ -24,12 +24,11 @@ def evaluate_agent(agent, epsilon, episodes=5):
         total_return = 0
 
         while not done:
-            # ε-greedy action selection
             if np.random.rand() < epsilon:  # Exploration
                 action = np.random.choice(env.nA)
             else:  # Exploitation
-                if state in agent.q_values:
-                    action = max(agent.q_values[state], key=agent.q_values[state].get)
+                if state in agent.q:
+                    action = max(agent.q[state], key=agent.q[state].get)
                 else:
                     action = np.random.choice(env.nA)  # Random action if state is unseen
 

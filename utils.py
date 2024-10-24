@@ -111,17 +111,13 @@ def make_eps_greedy_policy_distribution(state_action_values: ActionValueDict, ep
         q_values = np.array([state_action_values.get((*state, a), 0) for a in range(n_actions)])
         max_q_value = np.max(q_values)
         
-        # Start with equal probabilities for all actions
         action_probabilities = np.full(n_actions, epsilon / n_actions)
 
-        # Identify all actions with the maximum Q-value
         best_actions = np.where(q_values == max_q_value)[0]
         n_best_actions = len(best_actions)
         
-        # Update the probabilities for the best actions
         action_probabilities[best_actions] += (1.0 - epsilon) / n_best_actions
 
-        # Ensure the probabilities sum to 1 (to handle floating point precision)
         action_probabilities /= np.sum(action_probabilities)
 
         return action_probabilities

@@ -42,32 +42,31 @@ class Agent():
         raise NotImplementedError
 
 class Sarsa(Agent):
-    def __init__(self):
-        super().__init__()
-
     def agent_step(self, prev_state: State, prev_action: Action, prev_reward: float, current_state: State, done: bool) -> Action:
-        prev_state_action = (*prev_state, prev_action)
-
-        if prev_state_action not in self.q:
-            self.q[prev_state_action] = 0
-
-        if not done:
-            policy = self.get_current_policy()
-            next_action = policy(current_state)
-            current_state_action = (*current_state, next_action)
+        action = 0
+        
+        if done:
+            next_q_value = 0.0
+            action = None
+        else:
+            action = self.get_current_policy()(current_state)
+            current_state_action = (*current_state, action)
 
             if current_state_action not in self.q:
-                self.q[current_state_action] = 0
+                self.q[current_state_action] = 0.0
+                
+            next_q_value = self.q.get(current_state_action, 0.0)
+            
+        prev_state_action = (*prev_state, prev_action)    
+        
+        if prev_state_action not in self.q:
+            self.q[prev_state_action] = 0.0    
 
-            q_update = prev_reward + self.discount * self.q[current_state_action]
-        else:
-            q_update = prev_reward  # If done, no future reward
+        prev_q_val = self.q.get(prev_state_action, 0.0)
+        
+        self.q[prev_state_action] = prev_q_val + self.step_size * (prev_reward + self.discount * next_q_value - prev_q_val)
 
-        td_error = q_update - self.q[prev_state_action]
-
-        self.q[prev_state_action] += self.step_size * td_error
-
-        return next_action if not done else None
+        return action
 
 
 
@@ -75,23 +74,22 @@ class QLearningAgent(Agent):
     def __init__(self):
         super().__init__()
         
-    def agent_step(self, prev_state: State, prev_action: Action, reward: float, current_state: State, done: bool) -> Action:
-        prev_state_action = (*prev_state, prev_action)
-        if prev_state_action not in self.q:
-            self.q[prev_state_action] = 0.0  
+    def agent_step(self, prev_state: State, prev_action: Action, prev_reward: float, current_state: State, done: bool) -> Action:
+        action = 0 
 
         if done:
-            q_update = reward  # No future reward if done
-        else:
-            max_q = max([self.q.get((*current_state, a), 0) for a in range(9)])
-            q_update = reward + self.discount * max_q  # Q-learning update rule
+            max_q = 0.0  
+        else:            
+            max_q = max([self.q.get((*current_state, a), 0.0) for a in range(9)])
 
-        self.q[prev_state_action] += self.step_size * (q_update - self.q[prev_state_action])
+        prev_state_action = (*prev_state, prev_action)
+        prev_q_val = self.q.get(prev_state_action, 0.0)
+        
+        self.q[prev_state_action] = prev_q_val + self.step_size * (prev_reward + self.discount * max_q - prev_q_val)
 
-        policy = self.get_current_policy()
-        next_action = policy(current_state)
+        action = self.get_current_policy()(current_state)
 
-        return next_action
+        return action
 
 
 
@@ -108,21 +106,20 @@ def train_episode(agent: Agent, env: RaceTrack) -> tuple[list[State], list[Actio
     prev_action = None
     prev_reward = 0.0  
 
+    action = agent.get_current_policy()(state)
+    
     while not (done or truncated):
+        next_state, reward, done, truncated = env.step(action)  
         states.append(state)
 
-        policy = agent.get_current_policy()
-        action = policy(state)
-
         actions.append(action)
-        next_state, reward, done, truncated = env.step(action)  
 
         rewards.append(float(reward))  
+        
+        next_action = agent.agent_step(state, action, reward, next_state, done)
 
-        prev_state = state
-        prev_action = action
-        prev_reward = reward
         state = next_state
+        action = next_action
 
     return states, actions, rewards
 
